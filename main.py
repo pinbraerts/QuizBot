@@ -5,12 +5,12 @@ from os.path import join, realpath, dirname
 import threading
 from collections import defaultdict
 
-from core.UserProcessor import UserProcessor
+from Processor import Processor
 from util.KeyDefaultDict import KeyDefaultDict
 
 bot = Bot(open(join(dirname(realpath(__file__)), "data", "token")).read())
 
-threads = KeyDefaultDict(lambda key: UserProcessor(bot, key).startReturn())
+threads = KeyDefaultDict(lambda key: Processor(bot, key).startReturn())
 
 try:
     lastUpdate = 0

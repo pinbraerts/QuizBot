@@ -64,18 +64,7 @@ class UserProcessor(BaseThread):
         if ev == self.EventType.Message:
             return data.text
 
-    def cmdStart(self): # TODO:, testId=None):
-        self.sendMessage("ok")
-
-    def cmdCreate(self, testId=None):
-        while testId is None: # TODO: or not existsTest(testId):
-            testId = self.ask("Please, enter test id!")
-        self.sendMessage("Modifying test: " + testId)
-
     def sendMessage(self, *args):
         return self.bot.sendMessage(self.uid, *args)
 
-    cmds = {
-        "start": cmdStart,
-        "create": cmdCreate
-    }
+    cmds = {}
