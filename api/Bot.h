@@ -4,7 +4,6 @@
 #include <sstream>
 
 #include "Https.h"
-#include "../json/Parser.h"
 #include "User.h"
 
 class Bot {

@@ -3,8 +3,7 @@
 
 #include <string>
 
-#include "../json/Any.h"
-#include "../json/Types.h"
+#include "../json/json.h"
 
 struct User {
     using Id = unsigned;
