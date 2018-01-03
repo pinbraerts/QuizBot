@@ -4,7 +4,8 @@
 #include <sstream>
 
 #include "Https.h"
-#include "../json/JSONParser.h"
+#include "../json/Parser.h"
+#include "User.h"
 
 class Bot {
 private:
@@ -16,8 +17,10 @@ public:
         prefix += '/';
     }
 
-    void getMe(JSONAny& res) {
-        res = JSONAny { std::istringstream { Https(prefix + "getMe").make() } };
+    User getMe() {
+        json::object res { std::istringstream { Https(prefix + "getMe").make() } };
+        if(!res.get<json::Boolean>("ok")) throw std::runtime_error("Telegram error!");
+        return res.getItem<json::Object>("result");
     }
 };
 
