@@ -42,13 +42,13 @@ void json::Parser::parse(json::Any& root) {
         break;
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
-        input >> root.number;
+        input >> root.num;
         if(!input) throw std::runtime_error("Expected number literal!");
         {
-            DataType<Integer> i = root.number;
-            if(i == root.number) {
+            DataType<Integer> i = root.num;
+            if(i == root.num) {
                 root.type = json::Integer;
-                root.integer = i;
+                root.integ = i;
             } else root.type = json::Number;
         }
         break;

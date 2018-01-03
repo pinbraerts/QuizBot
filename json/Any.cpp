@@ -1,9 +1,13 @@
 #include "Any.h"
 #include "Parser.h"
 
+#include <sstream>
+
 using namespace json;
 
-json::Any::Any(): type(Null), number(0.0) {}
+json::Any::Any(): type(Null), num(0.0) {}
+
+json::Any::Any(std::string&& str): Any(std::istringstream { str }) {}
 
 json::Any::Any(const json::Any& other): type(other.type) {
     switch(type) {
@@ -14,19 +18,19 @@ json::Any::Any(const json::Any& other): type(other.type) {
         new (&items) DataType<Array> { other.items };
         break;
     case String:
-        new (&string) DataType<String> { other.string };
+        new (&str) DataType<String> { other.str };
         break;
     case Boolean:
-        condition = other.condition;
+        cond = other.cond;
         break;
     case Number:
-        number = other.number;
+        num = other.num;
         break;
     case Integer:
-        integer = other.integer;
+        integ = other.integ;
         break;
     case Null:
-        number = 0.0;
+        num = 0.0;
         break;
     }
 }
@@ -35,11 +39,11 @@ void json::Any::clear() {
     switch(type) {
     case Object: children.clear(); break;
     case Array: items.clear(); break;
-    case String: string.clear(); break;
-    case Boolean: condition = false; break;
-    case Number: number = 0.0; break;
-    case Integer: integer = 0; break;
-    case Null: number = 0.0; break;
+    case String: str.clear(); break;
+    case Boolean: cond = false; break;
+    case Number: num = 0.0; break;
+    case Integer: integ = 0; break;
+    case Null: num = 0.0; break;
     }
 }
 
@@ -58,19 +62,19 @@ json::Any& json::Any::operator=(json::Type tp) {
         new (&items) DataType<Array> {};
         break;
     case String:
-        new (&string) DataType<String> {};
+        new (&str) DataType<String> {};
         break;
     case Boolean:
-        condition = false;
+        cond = false;
         break;
     case Number:
-        number = 0.0;
+        num = 0.0;
         break;
     case Integer:
-        integer = 0;
+        integ = 0;
         break;
     case Null:
-        number = 0.0;
+        num = 0.0;
         break;
     }
     return *this;
@@ -79,7 +83,7 @@ json::Any& json::Any::operator=(json::Type tp) {
 json::Any& json::Any::operator=(json::DataType<String> s) {
     clear();
     type = String;
-    new (&string) std::string { s };
+    new (&str) std::string { s };
 }
 
 json::Any& json::Any::operator=(const json::Any& other) {
@@ -92,19 +96,19 @@ json::Any& json::Any::operator=(const json::Any& other) {
         new (&items) DataType<Array> { other.items };
         break;
     case String:
-        new (&string) DataType<String> { other.string };
+        new (&str) DataType<String> { other.str };
         break;
     case Boolean:
-        condition = other.condition;
+        cond = other.cond;
         break;
     case Number:
-        number = other.number;
+        num = other.num;
         break;
     case Integer:
-        integer = other.integer;
+        integ = other.integ;
         break;
     case Null:
-        number = 0.0;
+        num = 0.0;
         break;
     }
     return *this;
@@ -120,19 +124,19 @@ json::Any& json::Any::operator=(json::Any&& other) {
         new (&items) DataType<Array> { std::move(other.items) };
         break;
     case String:
-        new (&string) DataType<String> { std::move(other.string) };
+        new (&str) DataType<String> { std::move(other.str) };
         break;
     case Boolean:
-        condition = other.condition;
+        cond = other.cond;
         break;
     case Number:
-        number = other.number;
+        num = other.num;
         break;
     case Integer:
-        integer = other.integer;
+        integ = other.integ;
         break;
     case Null:
-        number = 0.0;
+        num = 0.0;
         break;
     }
     return *this;
@@ -141,13 +145,13 @@ json::Any& json::Any::operator=(json::Any&& other) {
 json::Any& json::Any::operator=(json::DataType<Boolean> ncond) {
     clear();
     type = Boolean;
-    condition = ncond;
+    cond = ncond;
 }
 
 json::Any& json::Any::operator=(json::DataType<Null> np) {
     clear();
     type = Null;
-    number = 0.0;
+    num = 0.0;
 }
 
 json::Any::Any(std::istream&& stream) {
@@ -177,17 +181,17 @@ std::ostream& json::operator<<(std::ostream& stream, const json::Any& obj) {
         stream << ']';
         break;
     case String:
-        stream << '"' << obj.string << '"';
+        stream << '"' << obj.str << '"';
         break;
     case Boolean:
-        if(obj.condition) stream << "true";
+        if(obj.cond) stream << "true";
         else stream << "false";
         break;
     case Number:
-        stream << obj.number;
+        stream << obj.num;
         break;
     case Integer:
-        stream << obj.integer;
+        stream << obj.integ;
         break;
     case Null:
         stream << "null";
