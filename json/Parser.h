@@ -2,8 +2,11 @@
 #define JSON_READER_H
 
 #include <iostream>
+#include <sstream>
 
 #include "Defines.h"
+#include "DataTypes.h"
+#include "Error.h"
 #include "Any.h"
 
 class json::Parser {

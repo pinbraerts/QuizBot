@@ -13,6 +13,13 @@ namespace json {
         Integer,
         Null
     };
+    static constexpr char* typeToStr[] = {
+        "Object", "Array", "String", "Boolean",
+        "Number", "Integer", "Null"
+    };
+
+    class NotFoundError;
+    class TypeError;
 
     template<Type t> struct __dthelper;
     template<Type t> using DataType = typename __dthelper<t>::type;

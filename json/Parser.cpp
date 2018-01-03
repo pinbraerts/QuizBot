@@ -2,8 +2,6 @@
 
 using namespace json;
 
-#include <sstream>
-
 json::Parser::Parser(std::istream& in): input(in) {}
 
 void json::Parser::parse(json::Any& root) {

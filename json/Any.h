@@ -1,7 +1,11 @@
 #ifndef JSON_ANY_H
 #define JSON_ANY_H
 
+#include <sstream>
+
 #include "Defines.h"
+#include "Error.h"
+#include "Parser.h"
 #include "DataTypes.h"
 
 class json::Any {
@@ -45,36 +49,36 @@ public:
         return items;
     }*/
     inline operator DataType<String>&() {
-        if(type != String) throw std::runtime_error("Type mismatch!");
+        if(type != String) throw TypeError(String, type);
         return str;
     }
     inline operator DataType<Boolean>&() {
-        if(type != Boolean) throw std::runtime_error("Type mismatch!");
+        if(type != Boolean) throw TypeError(Boolean, type);
         return cond;
     }
     inline operator DataType<Number>&() {
-        if(type != Number) throw std::runtime_error("Type mismatch!");
+        if(type != Number) throw TypeError(Number, type);
         return num;
     }
     inline operator DataType<Integer>&() {
-        if(type != Integer) throw std::runtime_error("Type mismatch!");
+        if(type != Integer) throw TypeError(Integer, type);
         return integ;
     }
 
     inline operator const DataType<String>&() const {
-        if(type != String) throw std::runtime_error("Type mismatch!");
+        if(type != String) throw TypeError(String, type);
         return str;
     }
     inline operator const DataType<Boolean>&() const {
-        if(type != Boolean) throw std::runtime_error("Type mismatch!");
+        if(type != Boolean) throw TypeError(Boolean, type);
         return cond;
     }
     inline operator const DataType<Number>&() const {
-        if(type != Number) throw std::runtime_error("Type mismatch!");
+        if(type != Number) throw TypeError(Number, type);
         return num;
     }
     inline operator const DataType<Integer>&() const {
-        if(type != Integer) throw std::runtime_error("Type mismatch!");
+        if(type != Integer) throw TypeError(Integer, type);
         return integ;
     }
 
