@@ -1,20 +1,22 @@
-#include "JSONAny.h"
-#include "JSONParser.h"
+#include "Any.h"
+#include "Parser.h"
 
-JSONAny::JSONAny(): type(Null), number(0.0) {}
+using namespace json;
 
-JSONAny::JSONAny(const JSONAny& other): type(other.type) {
+json::Any::Any(): type(Null), number(0.0) {}
+
+json::Any::Any(const json::Any& other): type(other.type) {
     switch(type) {
     case Object:
-        new (&children) std::map<std::string, JSONAny> { other.children };
+        new (&children) DataType<Object> { other.children };
         break;
     case Array:
-        new (&items) std::vector<JSONAny> { other.items };
+        new (&items) DataType<Array> { other.items };
         break;
     case String:
-        new (&string) std::string { other.string };
+        new (&string) DataType<String> { other.string };
         break;
-    case Bool:
+    case Boolean:
         condition = other.condition;
         break;
     case Number:
@@ -29,36 +31,36 @@ JSONAny::JSONAny(const JSONAny& other): type(other.type) {
     }
 }
 
-void JSONAny::clear() {
+void json::Any::clear() {
     switch(type) {
     case Object: children.clear(); break;
     case Array: items.clear(); break;
     case String: string.clear(); break;
-    case Bool: condition = false; break;
+    case Boolean: condition = false; break;
     case Number: number = 0.0; break;
     case Integer: integer = 0; break;
     case Null: number = 0.0; break;
     }
 }
 
-JSONAny::~JSONAny() {
+Any::~Any() {
     clear();
 }
 
-JSONAny& JSONAny::operator=(JSONAny::Type tp) {
+json::Any& json::Any::operator=(json::Type tp) {
     clear();
     type = tp;
     switch(type) {
     case Object:
-        new (&children) std::map<std::string, JSONAny> {};
+        new (&children) DataType<Object> {};
         break;
     case Array:
-        new (&items) std::vector<JSONAny> {};
+        new (&items) DataType<Array> {};
         break;
     case String:
-        new (&string) std::string {};
+        new (&string) DataType<String> {};
         break;
-    case Bool:
+    case Boolean:
         condition = false;
         break;
     case Number:
@@ -74,25 +76,25 @@ JSONAny& JSONAny::operator=(JSONAny::Type tp) {
     return *this;
 }
 
-JSONAny& JSONAny::operator=(std::string s) {
+json::Any& json::Any::operator=(json::DataType<String> s) {
     clear();
     type = String;
     new (&string) std::string { s };
 }
 
-JSONAny& JSONAny::operator=(const JSONAny& other) {
+json::Any& json::Any::operator=(const json::Any& other) {
     clear();
     switch(type = other.type) {
     case Object:
-        new (&children) std::map<std::string, JSONAny> { other.children };
+        new (&children) DataType<Object> { other.children };
         break;
     case Array:
-        new (&items) std::vector<JSONAny> { other.items };
+        new (&items) DataType<Array> { other.items };
         break;
     case String:
-        new (&string) std::string { other.string };
+        new (&string) DataType<String> { other.string };
         break;
-    case Bool:
+    case Boolean:
         condition = other.condition;
         break;
     case Number:
@@ -108,20 +110,19 @@ JSONAny& JSONAny::operator=(const JSONAny& other) {
     return *this;
 }
 
-JSONAny& JSONAny::operator=(JSONAny&& other) {
+json::Any& json::Any::operator=(json::Any&& other) {
     clear();
     switch(type = other.type) {
     case Object:
-        new (&children)
-            std::map<std::string, JSONAny> { std::move(other.children) };
+        new (&children) DataType<Object> { std::move(other.children) };
         break;
     case Array:
-        new (&items) std::vector<JSONAny> { std::move(other.items) };
+        new (&items) DataType<Array> { std::move(other.items) };
         break;
     case String:
-        new (&string) std::string { std::move(other.string) };
+        new (&string) DataType<String> { std::move(other.string) };
         break;
-    case Bool:
+    case Boolean:
         condition = other.condition;
         break;
     case Number:
@@ -137,26 +138,25 @@ JSONAny& JSONAny::operator=(JSONAny&& other) {
     return *this;
 }
 
-JSONAny& JSONAny::operator=(bool ncond) {
+json::Any& json::Any::operator=(json::DataType<Boolean> ncond) {
     clear();
-    type = Bool;
+    type = Boolean;
     condition = ncond;
-
 }
 
-JSONAny& JSONAny::operator=(nullptr_t np) {
+json::Any& json::Any::operator=(json::DataType<Null> np) {
     clear();
     type = Null;
     number = 0.0;
 }
 
-JSONAny::JSONAny(std::istream&& stream) {
-    JSONParser { stream }.parse(*this);
+json::Any::Any(std::istream&& stream) {
+    Parser { stream }.parse(*this);
 }
 
-std::ostream& operator<<(std::ostream& stream, const JSONAny& obj) {
+std::ostream& json::operator<<(std::ostream& stream, const json::Any& obj) {
     switch(obj.type) {
-    case JSONAny::Object:
+    case Object:
         stream << '{';
         {
             auto end = --obj.children.end();
@@ -166,7 +166,7 @@ std::ostream& operator<<(std::ostream& stream, const JSONAny& obj) {
         }
         stream << '}';
         break;
-    case JSONAny::Array:
+    case Array:
         stream << '[';
         {
             auto end = --obj.items.end();
@@ -176,26 +176,26 @@ std::ostream& operator<<(std::ostream& stream, const JSONAny& obj) {
         }
         stream << ']';
         break;
-    case JSONAny::String:
+    case String:
         stream << '"' << obj.string << '"';
         break;
-    case JSONAny::Bool:
+    case Boolean:
         if(obj.condition) stream << "true";
         else stream << "false";
         break;
-    case JSONAny::Number:
+    case Number:
         stream << obj.number;
         break;
-    case JSONAny::Integer:
+    case Integer:
         stream << obj.integer;
         break;
-    case JSONAny::Null:
+    case Null:
         stream << "null";
         break;
     }
     return stream;
 }
 
-inline std::istream& operator>>(std::istream& stream, JSONAny& obj) {
-    JSONParser { stream }.parse(obj);
+inline std::istream& json::operator>>(std::istream& stream, json::Any& obj) {
+    Parser { stream }.parse(obj);
 }

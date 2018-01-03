@@ -1,10 +1,14 @@
-#include "JSONParser.h"
+#include "Parser.h"
+
+using namespace json;
 
 #include <sstream>
 
-void JSONParser::parse(JSONAny& root) {
+json::Parser::Parser(std::istream& in): input(in) {}
+
+void json::Parser::parse(json::Any& root) {
     skipSpaces();
-    if(!input) { root.type = JSONAny::Null; return; }
+    if(!input) { root.type = json::Null; return; }
     switch(input.peek()) {
     case '{': parseObject(root); break;
     case '[': parseArray(root); break;
@@ -41,25 +45,24 @@ void JSONParser::parse(JSONAny& root) {
         input >> root.number;
         if(!input) throw std::runtime_error("Expected number literal!");
         {
-            int i = root.number;
+            DataType<Integer> i = root.number;
             if(i == root.number) {
-                root.type = JSONAny::Integer;
+                root.type = json::Integer;
                 root.integer = i;
-            } else root.type = JSONAny::Number;
+            } else root.type = json::Number;
         }
         break;
     }
 }
 
-void JSONParser::parseObject(JSONAny& root) {
+void json::Parser::parseObject(json::Any& root) {
     if(!input || input.get() != '{')
         throw std::runtime_error("Expected object!");
-    root = JSONAny::Object;
+    root = json::Object;
     while(input) {
         skipSpaces();
-        JSONAny child;
-        std::string s = parseString();
-        std::cerr << "Item: " << s << std::endl;
+        Any child;
+        DataType<String> s = parseString();
         skipSpaces();
         if(input.get() != ':')
             throw std::runtime_error("Expected colon!");
@@ -73,7 +76,7 @@ void JSONParser::parseObject(JSONAny& root) {
         throw std::runtime_error("Expected end of object!");
 }
 
-std::string JSONParser::parseString() {
+DataType<String> json::Parser::parseString() {
     if(!input) throw std::runtime_error("Expected string!");
     char d = input.get();
     if(d != '"' && d != '\'') throw std::runtime_error("Expected string!");
@@ -89,13 +92,13 @@ std::string JSONParser::parseString() {
     throw std::runtime_error("Expected end of string literal!");
 }
 
-void JSONParser::parseArray(JSONAny& root) {
+void json::Parser::parseArray(json::Any& root) {
     if(!input || input.get() != '[')
         throw std::runtime_error("Expected array!");
-    root = JSONAny::Array;
+    root = json::Array;
     while(input) {
         skipSpaces();
-        JSONAny child;
+        Any child;
         parse(child);
         root.items.push_back(std::move(child));
         skipSpaces();
@@ -106,6 +109,6 @@ void JSONParser::parseArray(JSONAny& root) {
         throw std::runtime_error("Expected end of array!");
 }
 
-void JSONParser::skipSpaces() {
+void Parser::skipSpaces() {
     while(input && isspace(input.peek())) input.get();
 }
