@@ -18,9 +18,30 @@ public:
     }
 
     User getMe() {
-        json::object res { std::istringstream { Https(prefix + "getMe").make() } };
-        if(!res.get<json::Boolean>("ok")) throw std::runtime_error("Telegram error!");
+        json::object res { Https(prefix + "getMe").make() };
+        if(!res["ok"]) throw std::runtime_error("Telegram error! " +
+                res.get<json::String>("description"));
         return res.getItem<json::Object>("result");
+    }
+
+    // TODO: add message class
+    void sendMessage(User::Id chatId, std::string text) {
+        json::object res {
+            Https(prefix + "sendMessage?chat_id=" +
+                std::to_string(chatId) + "&text=" + text).make()
+        };
+        if(!res["ok"]) throw std::runtime_error("Telegram error! " +
+                res.get<json::String>("description"));
+    }
+
+    // TODO: add message class
+    void sendMessage(std::string chatUsername, std::string text) {
+        json::object res {
+            Https(prefix + "sendMessage?chat_id=" +
+                chatUsername + "&text=" + text).make()
+        };
+        if(!res["ok"]) throw std::runtime_error("Telegram error! " +
+                res.get<json::String>("description"));
     }
 };
 

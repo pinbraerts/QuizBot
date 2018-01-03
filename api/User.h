@@ -7,7 +7,9 @@
 #include "../json/Types.h"
 
 struct User {
-    unsigned id = 0;
+    using Id = unsigned;
+
+    Id id = 0;
     bool isBot = false;
     std::string firstName;
     std::string lastName;
@@ -15,8 +17,8 @@ struct User {
     std::string languageCode;
 
     User(const json::object& obj): id(obj.get<json::Integer>("id")),
-        isBot(obj.get<json::Boolean>("is_bot")),
-        firstName(obj.get<json::String>("first_name")),
+        isBot(obj["is_bot"]),
+        firstName(obj["first_name"]),
         lastName(obj.getOrDefault<json::String>("last_name")),
         username(obj.getOrDefault<json::String>("username")),
         languageCode(obj.getOrDefault<json::String>("language_code")) {}
