@@ -4,15 +4,28 @@
 JSONAny::JSONAny(): type(Null), number(0.0) {}
 
 JSONAny::JSONAny(const JSONAny& other): type(other.type) {
-    switch(type = other.type) {
-    case Object: children = std::move(other.children); break;
-    case Array: items = std::move(other.items); break;
-    case String: string = std::move(other.string); break;
-    case Bool: condition = other.condition; break;
-
-    case Number: number = other.number; break;
-    case Integer: integer = other.integer; break;
-    case Null: number = 0.0; break;
+    switch(type) {
+    case Object:
+        new (&children) std::map<std::string, JSONAny> { other.children };
+        break;
+    case Array:
+        new (&items) std::vector<JSONAny> { other.items };
+        break;
+    case String:
+        new (&string) std::string { other.string };
+        break;
+    case Bool:
+        condition = other.condition;
+        break;
+    case Number:
+        number = other.number;
+        break;
+    case Integer:
+        integer = other.integer;
+        break;
+    case Null:
+        number = 0.0;
+        break;
     }
 }
 
@@ -22,7 +35,6 @@ void JSONAny::clear() {
     case Array: items.clear(); break;
     case String: string.clear(); break;
     case Bool: condition = false; break;
-
     case Number: number = 0.0; break;
     case Integer: integer = 0; break;
     case Null: number = 0.0; break;
@@ -71,14 +83,27 @@ JSONAny& JSONAny::operator=(std::string s) {
 JSONAny& JSONAny::operator=(const JSONAny& other) {
     clear();
     switch(type = other.type) {
-    case Object: children = other.children; break;
-    case Array: items = other.items; break;
-    case String: string = other.string; break;
-    case Bool: condition = other.condition; break;
-
-    case Number: number = other.number; break;
-    case Integer: integer = other.integer; break;
-    case Null: number = 0.0; break;
+    case Object:
+        new (&children) std::map<std::string, JSONAny> { other.children };
+        break;
+    case Array:
+        new (&items) std::vector<JSONAny> { other.items };
+        break;
+    case String:
+        new (&string) std::string { other.string };
+        break;
+    case Bool:
+        condition = other.condition;
+        break;
+    case Number:
+        number = other.number;
+        break;
+    case Integer:
+        integer = other.integer;
+        break;
+    case Null:
+        number = 0.0;
+        break;
     }
     return *this;
 }
@@ -86,14 +111,28 @@ JSONAny& JSONAny::operator=(const JSONAny& other) {
 JSONAny& JSONAny::operator=(JSONAny&& other) {
     clear();
     switch(type = other.type) {
-    case Object: children = std::move(other.children); break;
-    case Array: items = std::move(other.items); break;
-    case String: string = std::move(other.string); break;
-    case Bool: condition = other.condition; break;
-
-    case Number: number = other.number; break;
-    case Integer: integer = other.integer; break;
-    case Null: number = 0.0; break;
+    case Object:
+        new (&children)
+            std::map<std::string, JSONAny> { std::move(other.children) };
+        break;
+    case Array:
+        new (&items) std::vector<JSONAny> { std::move(other.items) };
+        break;
+    case String:
+        new (&string) std::string { std::move(other.string) };
+        break;
+    case Bool:
+        condition = other.condition;
+        break;
+    case Number:
+        number = other.number;
+        break;
+    case Integer:
+        integer = other.integer;
+        break;
+    case Null:
+        number = 0.0;
+        break;
     }
     return *this;
 }
@@ -111,7 +150,7 @@ JSONAny& JSONAny::operator=(nullptr_t np) {
     number = 0.0;
 }
 
-JSONAny::JSONAny(std::istream& stream) {
+JSONAny::JSONAny(std::istream&& stream) {
     JSONParser { stream }.parse(*this);
 }
 
@@ -142,7 +181,6 @@ std::ostream& operator<<(std::ostream& stream, const JSONAny& obj) {
         break;
     case JSONAny::Bool:
         if(obj.condition) stream << "true";
-
         else stream << "false";
         break;
     case JSONAny::Number:
@@ -156,4 +194,8 @@ std::ostream& operator<<(std::ostream& stream, const JSONAny& obj) {
         break;
     }
     return stream;
+}
+
+inline std::istream& operator>>(std::istream& stream, JSONAny& obj) {
+    JSONParser { stream }.parse(obj);
 }

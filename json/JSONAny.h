@@ -28,6 +28,7 @@ public:
     };
 
     friend std::ostream& operator<<(std::ostream& stream, const JSONAny& obj);
+    friend inline std::istream& operator>>(std::istream& stream, JSONAny& obj);
 
     JSONAny& operator=(Type tp);
     JSONAny& operator=(const JSONAny& other);
@@ -38,7 +39,7 @@ public:
 
     JSONAny();
     JSONAny(const JSONAny& other);
-    JSONAny(std::istream& stream);
+    JSONAny(std::istream&& stream);
 
     void clear();
 

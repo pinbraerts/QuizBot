@@ -59,6 +59,7 @@ void JSONParser::parseObject(JSONAny& root) {
         skipSpaces();
         JSONAny child;
         std::string s = parseString();
+        std::cerr << "Item: " << s << std::endl;
         skipSpaces();
         if(input.get() != ':')
             throw std::runtime_error("Expected colon!");
