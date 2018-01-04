@@ -13,7 +13,7 @@ namespace json {
         Integer,
         Null
     };
-    static constexpr char* typeToStr[] = {
+    static constexpr const char* typeToStr[] = {
         "Object", "Array", "String", "Boolean",
         "Number", "Integer", "Null"
     };
