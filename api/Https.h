@@ -22,9 +22,36 @@ private:
 public:
     std::ostringstream url;
 
-    Https(std::string&& nurl): url(nurl) {}
+    Https(std::string&& nurl) {
+        url << nurl;
+    }
+    Https(const Https& other): curlHandle(curl_easy_duphandle(other.curlHandle)) {
+        url << other.url.str();
+        curl_easy_setopt(curlHandle, CURLOPT_WRITEDATA, &url);
+    }
+    Https(Https&& other): url(std::move(other.url)),
+        curlHandle(other.curlHandle) {
+        other.curlHandle = nullptr;
+        curl_easy_setopt(curlHandle, CURLOPT_WRITEDATA, &url);
+    }
 
-    std::string make() {
+    Https& operator=(const Https& other) {
+        clear();
+        url << other.url.str();
+        curlHandle = curl_easy_duphandle(other.curlHandle);
+        curl_easy_setopt(curlHandle, CURLOPT_WRITEDATA, &url);
+        return *this;
+    }
+    Https& operator=(Https&& other) {
+        clear();
+        url = std::move(other.url);
+        curlHandle = other.curlHandle;
+        other.curlHandle = nullptr;
+        curl_easy_setopt(curlHandle, CURLOPT_WRITEDATA, &url);
+        return *this;
+    }
+
+    std::string makef() {
         std::ostringstream ss;
         curl_easy_setopt(curlHandle, CURLOPT_WRITEDATA, &ss);
         curl_easy_setopt(curlHandle, CURLOPT_URL, url.str().c_str());
@@ -34,8 +61,26 @@ public:
         return ss.str();
     }
 
+    static constexpr class Make {} make {};
+
+    template<class T> inline Https& operator<<(const T& obj) {
+        url << obj;
+        return *this;
+    }
+    template<class T> inline Https& operator<<(T&& obj) {
+        url << obj;
+        return *this;
+    }
+    inline std::string operator<<(Make _) {
+        return makef();
+    }
+
+    void clear() {
+        if(curlHandle != nullptr) curl_easy_cleanup(curlHandle);
+    }
+
     ~Https() {
-        curl_easy_cleanup(curlHandle);
+        clear();
     }
 };
 
