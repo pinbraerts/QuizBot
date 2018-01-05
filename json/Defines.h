@@ -39,7 +39,6 @@ namespace json {
     class number;
     class integer;
 
-
     std::ostream& operator<<(std::ostream& stream, const Any& obj);
     inline std::istream& operator>>(std::istream& stream, Any& obj);
 

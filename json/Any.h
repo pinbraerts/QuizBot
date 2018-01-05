@@ -24,17 +24,31 @@ public:
     friend std::ostream& operator<<(std::ostream& stream, const Any& obj);
     friend inline std::istream& operator>>(std::istream& stream, Any& obj);
 
-    Any& operator=(Type tp);
-    Any& operator=(const Any& other);
-    Any& operator=(Any&& other);
+    Any();
+    Any(Type tp);
+    Any(const Any& other);
+    Any(Any&& other);
+    Any(std::istream&& stream);
+    Any(std::string&& str);
+
+    inline Any& operator=(Type tp) {
+        clear();
+        new (this) json::Any { tp };
+        return *this;
+    }
+    inline Any& operator=(const Any& other) {
+        clear();
+        new (this) Any { other };
+        return *this;
+    }
+    inline Any& operator=(Any&& other) {
+        clear();
+        new (this) Any { std::move(other) };
+        return *this;
+    }
     Any& operator=(DataType<Boolean> ncond);
     Any& operator=(DataType<String> s);
     Any& operator=(DataType<Null> np);
-
-    Any();
-    Any(const Any& other);
-    Any(std::istream&& stream);
-    Any(std::string&& str);
 
     /*template<Type t> inline operator DataType<t>&() {
         if(type != t) throw std::runtime_error("Type mismatch!");

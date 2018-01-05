@@ -9,17 +9,15 @@ struct json::object: json::__base<json::Object> {
 
     // throw if not found and type mismatch
     template<Type t> inline const DataType<t>& get(std::string id) const {
-        auto iter = children.lower_bound(id);
-        if(iter == children.end() || iter->first != id)
-            throw NotFoundError(id);
+        auto iter = children.find(id);
+        if(iter == children.end()) throw NotFoundError(id);
         if(iter->second.type != t) throw TypeError(t, iter->second.type, id);
         return iter->second.*member<t>;
     }
     // throw if not found and type mismatch
     template<Type t> inline DataType<t>& get(std::string id) {
-        auto iter = children.lower_bound(id);
-        if(iter == children.end() || iter->first != id)
-            throw NotFoundError(id);
+        auto iter = children.find(id);
+        if(iter == children.end()) throw NotFoundError(id);
         if(iter->second.type != t) throw TypeError(t, iter->second.type, id);
         return iter->second.*member<t>;
     }
@@ -27,8 +25,8 @@ struct json::object: json::__base<json::Object> {
     // throw if type mismatch
     template<Type t> inline const DataType<t>& getOrDefault(std::string id,
         const DataType<t>& def = DataType<t>{}) const {
-        auto iter = children.lower_bound(id);
-        if(iter == children.end() || iter->first != id) return def;
+        auto iter = children.find(id);
+        if(iter == children.end()) return def;
         if(iter->second.type != t) throw TypeError(t, iter->second.type, id);
         return iter->second.*member<t>;
     }
@@ -36,8 +34,8 @@ struct json::object: json::__base<json::Object> {
     // throw if type mismatch
     template<Type t> inline DataType<t> getOrDefault(std::string id,
         DataType<t> def = DataType<t>{}) {
-        auto iter = children.lower_bound(id);
-        if(iter == children.end() || iter->first != id) return def;
+        auto iter = children.find(id);
+        if(iter == children.end()) return def;
         if(iter->second.type != t) throw TypeError(t, iter->second.type, id);
         return iter->second.*member<t>;
     }
@@ -45,25 +43,23 @@ struct json::object: json::__base<json::Object> {
     // nothrow
     template<Type t> inline const DataType<t>& getNearOrDefault(std::string id,
         const DataType<t>& def = DataType<t>{}) const {
-        auto iter = children.lower_bound(id);
-        if(iter == children.end() || iter->first != id ||
-            iter->second.type != t) return def;
+        auto iter = children.find(id);
+        if(iter == children.end() || iter->second.type != t) return def;
         return iter->second.*member<t>;
     }
 
     // nothrow
     template<Type t> inline DataType<t> getNearOrDefault(std::string id,
         DataType<t> def = DataType<t>{}) {
-        auto iter = children.lower_bound(id);
-        if(iter == children.end() || iter->first != id ||
-            iter->second.type != t) return def;
+        auto iter = children.find(id);
+        if(iter == children.end() || iter->second.type != t) return def;
         return iter->second.*member<t>;
     }
 
     // throw if not found and type mismatch
     template<Type t> inline ItemType<t> getItem(std::string id) {
-        auto iter = children.lower_bound(id);
-        if(iter == children.end() || iter->first != id)
+        auto iter = children.find(id);
+        if(iter == children.end())
             throw NotFoundError(id);
         if(iter->second.type != t) throw TypeError(t, iter->second.type, id);
         return iter->second;
@@ -71,37 +67,37 @@ struct json::object: json::__base<json::Object> {
 
     // throw if not found and type mismatch
     template<Type t> inline const ItemType<t>& getItem(std::string id) const {
-        auto iter = children.lower_bound(id);
-        if(iter == children.end() || iter->first != id)
+        auto iter = children.find(id);
+        if(iter == children.end())
             throw NotFoundError(id);
         if(iter->second.type != t) throw TypeError(t, iter->second.type, id);
         return iter->second;
     }
 
-    inline Any& operator[](std::string id) {
-        auto iter = children.lower_bound(id);
-        if(iter == children.end() || iter->first != id)
+    Any& operator[](std::string id) {
+        auto iter = children.find(id);
+        if(iter == children.end())
             throw NotFoundError(id);
         return iter->second;
     }
 
-    inline const Any& operator[](std::string id) const {
-        auto iter = children.lower_bound(id);
-        if(iter == children.end() || iter->first != id)
+    const Any& operator[](std::string id) const {
+        auto iter = children.find(id);
+        if(iter == children.end())
             throw NotFoundError(id);
         return iter->second;
     }
 
-    inline Any& operator[](const char* id) {
-        auto iter = children.lower_bound(id);
-        if(iter == children.end() || iter->first != id)
+    Any& operator[](const char* id) {
+        auto iter = children.find(id);
+        if(iter == children.end())
             throw NotFoundError(id);
         return iter->second;
     }
 
-    inline const Any& operator[](const char* id) const {
-        auto iter = children.lower_bound(id);
-        if(iter == children.end() || iter->first != id)
+    const Any& operator[](const char* id) const {
+        auto iter = children.find(id);
+        if(iter == children.end())
             throw NotFoundError(id);
         return iter->second;
     }

@@ -40,6 +40,7 @@ void json::Parser::parse(json::Any& root) {
         break;
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
+        root = json::Number;
         input >> root.num;
         if(!input) throw std::runtime_error("Expected number literal!");
         {
@@ -47,7 +48,7 @@ void json::Parser::parse(json::Any& root) {
             if(i == root.num) {
                 root.type = json::Integer;
                 root.integ = i;
-            } else root.type = json::Number;
+            }
         }
         break;
     }
@@ -59,13 +60,11 @@ void json::Parser::parseObject(json::Any& root) {
     root = json::Object;
     while(input) {
         skipSpaces();
-        Any child;
-        DataType<String> s = parseString();
+        Any& child { root.children[parseString()] };
         skipSpaces();
         if(input.get() != ':')
             throw std::runtime_error("Expected colon!");
         parse(child);
-        root.children[s] = std::move(child);
         skipSpaces();
         if(input.peek() != ',') break;
         input.get();
@@ -96,9 +95,9 @@ void json::Parser::parseArray(json::Any& root) {
     root = json::Array;
     while(input) {
         skipSpaces();
-        Any child;
+        root.items.emplace_back();
+        Any& child { root.items.back() };
         parse(child);
-        root.items.push_back(std::move(child));
         skipSpaces();
         if(input.peek() != ',') break;
         input.get();

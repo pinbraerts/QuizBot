@@ -3,9 +3,35 @@
 using namespace json;
 
 json::Any::Any(): type(Null), num(0.0) {}
-
+json::Any::Any(std::istream&& stream): type(Null) {
+    Parser { stream }.parse(*this);
+}
 json::Any::Any(std::string&& str): Any(std::istringstream { str }) {}
-
+json::Any::Any(json::Type tp): type(tp) {
+    switch(type) {
+    case Object:
+        new (&children) DataType<Object> {};
+        break;
+    case Array:
+        new (&items) DataType<Array> {};
+        break;
+    case String:
+        new (&str) DataType<String> {};
+        break;
+    case Boolean:
+        cond = false;
+        break;
+    case Number:
+        num = 0.0;
+        break;
+    case Integer:
+        integ = 0;
+        break;
+    case Null:
+        num = 0.0;
+        break;
+    }
+}
 json::Any::Any(const json::Any& other): type(other.type) {
     switch(type) {
     case Object:
@@ -16,6 +42,31 @@ json::Any::Any(const json::Any& other): type(other.type) {
         break;
     case String:
         new (&str) DataType<String> { other.str };
+        break;
+    case Boolean:
+        cond = other.cond;
+        break;
+    case Number:
+        num = other.num;
+        break;
+    case Integer:
+        integ = other.integ;
+        break;
+    case Null:
+        num = 0.0;
+        break;
+    }
+}
+json::Any::Any(json::Any&& other): type(other.type) {
+    switch(type) {
+    case Object:
+        new (&children) DataType<Object> { std::move(other.children) };
+        break;
+    case Array:
+        new (&items) DataType<Array> { std::move(other.items) };
+        break;
+    case String:
+        new (&str) DataType<String> { std::move(other.str) };
         break;
     case Boolean:
         cond = other.cond;
@@ -43,38 +94,8 @@ void json::Any::clear() {
     case Null: num = 0.0; break;
     }
 }
-
 Any::~Any() {
     clear();
-}
-
-json::Any& json::Any::operator=(json::Type tp) {
-    clear();
-    type = tp;
-    switch(type) {
-    case Object:
-        new (&children) DataType<Object> {};
-        break;
-    case Array:
-        new (&items) DataType<Array> {};
-        break;
-    case String:
-        new (&str) DataType<String> {};
-        break;
-    case Boolean:
-        cond = false;
-        break;
-    case Number:
-        num = 0.0;
-        break;
-    case Integer:
-        integ = 0;
-        break;
-    case Null:
-        num = 0.0;
-        break;
-    }
-    return *this;
 }
 
 json::Any& json::Any::operator=(json::DataType<String> s) {
@@ -82,77 +103,15 @@ json::Any& json::Any::operator=(json::DataType<String> s) {
     type = String;
     new (&str) std::string { s };
 }
-
-json::Any& json::Any::operator=(const json::Any& other) {
-    clear();
-    switch(type = other.type) {
-    case Object:
-        new (&children) DataType<Object> { other.children };
-        break;
-    case Array:
-        new (&items) DataType<Array> { other.items };
-        break;
-    case String:
-        new (&str) DataType<String> { other.str };
-        break;
-    case Boolean:
-        cond = other.cond;
-        break;
-    case Number:
-        num = other.num;
-        break;
-    case Integer:
-        integ = other.integ;
-        break;
-    case Null:
-        num = 0.0;
-        break;
-    }
-    return *this;
-}
-
-json::Any& json::Any::operator=(json::Any&& other) {
-    clear();
-    switch(type = other.type) {
-    case Object:
-        new (&children) DataType<Object> { std::move(other.children) };
-        break;
-    case Array:
-        new (&items) DataType<Array> { std::move(other.items) };
-        break;
-    case String:
-        new (&str) DataType<String> { std::move(other.str) };
-        break;
-    case Boolean:
-        cond = other.cond;
-        break;
-    case Number:
-        num = other.num;
-        break;
-    case Integer:
-        integ = other.integ;
-        break;
-    case Null:
-        num = 0.0;
-        break;
-    }
-    return *this;
-}
-
 json::Any& json::Any::operator=(json::DataType<Boolean> ncond) {
     clear();
     type = Boolean;
     cond = ncond;
 }
-
 json::Any& json::Any::operator=(json::DataType<Null> np) {
     clear();
     type = Null;
     num = 0.0;
-}
-
-json::Any::Any(std::istream&& stream) {
-    Parser { stream }.parse(*this);
 }
 
 std::ostream& json::operator<<(std::ostream& stream, const json::Any& obj) {

@@ -37,12 +37,14 @@ template<> struct json::__ithelper<json::Integer> {
 template<json::Type t> class json::__base: public json::Any {
 public:
     __base(const Any& other): Any(other.type == t ? other :
-        throw std::runtime_error("Type mismatch!")) {}
+        throw TypeError(t, other.type)) {}
     __base(Any&& other): Any(other.type == t ? std::move(other) :
-        throw std::runtime_error("Type mismatch!")) {}
-
-    inline operator DataType<t>&() {
-        return this->*member<t>;
+        throw TypeError(t, other.type)) {}
+    __base(std::istream&& stream): Any(std::move(stream)) {
+        if(t != type) throw TypeError(t, type);
+    }
+    __base(std::string&& str): Any(std::move(str)) {
+        if(t != type) throw TypeError(t, type);
     }
 };
 
